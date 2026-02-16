@@ -26,8 +26,8 @@ async function copyToClipboard(text, button) {
   const originalAria = button?.getAttribute('aria-label');
   if (button) {
     button.disabled = true;
-    button.textContent = 'Copiado';
-    button.setAttribute('aria-label', 'Copiado');
+    button.textContent = '¡Copiado!';
+    button.setAttribute('aria-label', '¡Copiado!');
   }
 
   try {
@@ -44,10 +44,10 @@ async function copyToClipboard(text, button) {
       document.execCommand('copy');
       document.body.removeChild(area);
     }
-    showToast('Prompt copiado');
+    showToast('¡Listo! Prompt copiado');
   } catch (err) {
     console.error('Error al copiar:', err);
-    showToast('No se pudo copiar');
+    showToast('No pude copiar el prompt');
   } finally {
     if (button) {
       setTimeout(() => {
@@ -90,7 +90,7 @@ function createCard(prompt) {
 function renderPrompts(prompts) {
   gridEl.innerHTML = '';
   if (!Array.isArray(prompts) || prompts.length === 0) {
-    setStatus('No hay prompts disponibles.');
+    setStatus('Aún no tienes prompts guardados.');
     return;
   }
 
@@ -99,11 +99,11 @@ function renderPrompts(prompts) {
     fragment.appendChild(createCard(item));
   });
   gridEl.appendChild(fragment);
-  setStatus(`${prompts.length} prompts disponibles.`);
+  setStatus(`${prompts.length} prompts listos.`);
 }
 
 async function loadPrompts() {
-  setStatus('Cargando prompts...');
+  setStatus('Preparando tus prompts...');
   try {
     const response = await fetch(DATA_URL, { cache: 'no-store' });
     if (!response.ok) {
@@ -116,8 +116,8 @@ async function loadPrompts() {
     renderPrompts(data.map((p) => ({ id: p.id, name: p.name, content: p.content })));
   } catch (err) {
     console.error('Error al cargar prompts:', err);
-    setStatus('No se pudieron cargar los prompts.', { isError: true });
-    showToast('Error al cargar los prompts');
+    setStatus('No pude cargar tus prompts.', { isError: true });
+    showToast('No pude cargar los prompts');
   }
 }
 
