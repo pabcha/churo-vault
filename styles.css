@@ -242,6 +242,7 @@ body {
   margin: 0;
   margin: 16px 18px 0;
   padding: 14px;
+  max-height: clamp(220px, 55vh, 520px);
   overflow: auto;
   white-space: pre-wrap;
   word-break: break-word;
