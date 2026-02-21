@@ -1,9 +1,16 @@
 const DATA_URL = 'https://raw.githubusercontent.com/pabcha/apps-configs/refs/heads/main/churo-vaul.resource.json';
+const PROMPT_PREVIEW_LIMIT = 60;
 
 const gridEl = document.getElementById('grid');
 const statusEl = document.getElementById('status');
 const toastEl = document.getElementById('toast');
 let toastTimer = null;
+
+function truncatePrompt(content, limit = PROMPT_PREVIEW_LIMIT) {
+  const text = typeof content === 'string' ? content : '';
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit).trimEnd()}...`;
+}
 
 function setStatus(message, { isError = false } = {}) {
   if (!statusEl) return;
@@ -68,7 +75,7 @@ function createCard(prompt) {
 
   const text = document.createElement('p');
   text.className = 'prompt';
-  text.textContent = prompt.content || '';
+  text.textContent = truncatePrompt(prompt.content);
 
   const actions = document.createElement('div');
   actions.className = 'actions';
