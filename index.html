@@ -26,6 +26,19 @@
     </noscript>
   </main>
 
+  <dialog class="prompt-dialog" id="prompt-dialog" aria-labelledby="prompt-dialog-title">
+    <article class="prompt-dialog__panel">
+      <header class="prompt-dialog__header">
+        <h2 class="prompt-dialog__title" id="prompt-dialog-title">Detalle del prompt</h2>
+        <button class="prompt-dialog__close" id="prompt-dialog-close" type="button" aria-label="Cerrar detalle">×</button>
+      </header>
+      <section class="prompt-dialog__content" id="prompt-dialog-content"></section>
+      <div class="prompt-dialog__actions">
+        <button class="button" id="prompt-dialog-copy" type="button" aria-label="Copiar prompt completo">Copiar</button>
+      </div>
+    </article>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="script.js" defer></script>

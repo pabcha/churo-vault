@@ -4,7 +4,14 @@ const PROMPT_PREVIEW_LIMIT = 80;
 const gridEl = document.getElementById('grid');
 const statusEl = document.getElementById('status');
 const toastEl = document.getElementById('toast');
+const dialogEl = document.getElementById('prompt-dialog');
+const dialogTitleEl = document.getElementById('prompt-dialog-title');
+const dialogContentEl = document.getElementById('prompt-dialog-content');
+const dialogCloseEl = document.getElementById('prompt-dialog-close');
+const dialogCopyEl = document.getElementById('prompt-dialog-copy');
 let toastTimer = null;
+let lastTriggerEl = null;
+let activeDialogPromptContent = '';
 
 function normalizePromptPreview(content) {
   const text = typeof content === 'string' ? content : '';
@@ -75,6 +82,69 @@ async function copyToClipboard(text, button) {
   }
 }
 
+function openPromptDialog(prompt, triggerEl) {
+  if (!dialogEl || !dialogTitleEl || !dialogContentEl) return;
+
+  lastTriggerEl = triggerEl || null;
+  const promptName = prompt?.name || 'Sin título';
+  const promptContent = typeof prompt?.content === 'string' ? prompt.content : '';
+  activeDialogPromptContent = promptContent;
+
+  dialogTitleEl.textContent = promptName;
+
+  dialogContentEl.textContent = promptContent;
+
+  if (dialogCopyEl) {
+    dialogCopyEl.textContent = 'Copiar';
+    dialogCopyEl.setAttribute('aria-label', `Copiar prompt ${promptName}`);
+  }
+
+  dialogEl.showModal();
+}
+
+function closePromptDialog() {
+  if (!dialogEl?.open) return;
+  dialogEl.close();
+}
+
+function setupDialog() {
+  if (!dialogEl) return;
+
+  if (dialogCloseEl) {
+    dialogCloseEl.addEventListener('click', closePromptDialog);
+  }
+
+  if (dialogCopyEl) {
+    dialogCopyEl.addEventListener('click', () => {
+      copyToClipboard(activeDialogPromptContent, dialogCopyEl);
+    });
+  }
+
+  dialogEl.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closePromptDialog();
+  });
+
+  dialogEl.addEventListener('click', (event) => {
+    const rect = dialogEl.getBoundingClientRect();
+    const isInDialog =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+    if (!isInDialog) {
+      closePromptDialog();
+    }
+  });
+
+  dialogEl.addEventListener('close', () => {
+    if (lastTriggerEl && typeof lastTriggerEl.focus === 'function') {
+      lastTriggerEl.focus();
+    }
+    lastTriggerEl = null;
+  });
+}
+
 function createCard(prompt) {
   const card = document.createElement('article');
   card.className = 'card';
@@ -87,12 +157,13 @@ function createCard(prompt) {
   text.textContent = truncatePrompt(prompt.content);
   text.setAttribute('role', 'button');
   text.setAttribute('tabindex', '0');
-  text.setAttribute('aria-label', `Copiar prompt ${prompt.name || ''}`.trim());
-  text.addEventListener('click', () => copyToClipboard(prompt.content || '', button));
+  text.setAttribute('aria-label', `Ver detalle de prompt ${prompt.name || ''}`.trim());
+  text.setAttribute('title', 'Ver prompt completo');
+  text.addEventListener('click', () => openPromptDialog(prompt, text));
   text.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      copyToClipboard(prompt.content || '', button);
+      openPromptDialog(prompt, text);
     }
   });
 
@@ -139,7 +210,7 @@ async function loadPrompts() {
     if (!Array.isArray(data)) {
       throw new Error('El JSON no es un array.');
     }
-    renderPrompts(data.map((p) => ({ id: p.id, name: p.name, content: p.content })));
+    renderPrompts(data.map((p) => ({ ...p })));
   } catch (err) {
     console.error('Error al cargar prompts:', err);
     setStatus('No pude cargar tus prompts.', { isError: true });
@@ -147,4 +218,7 @@ async function loadPrompts() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadPrompts);
+document.addEventListener('DOMContentLoaded', () => {
+  setupDialog();
+  loadPrompts();
+});
