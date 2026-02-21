@@ -1,13 +1,22 @@
 const DATA_URL = 'https://raw.githubusercontent.com/pabcha/apps-configs/refs/heads/main/churo-vaul.resource.json';
-const PROMPT_PREVIEW_LIMIT = 60;
+const PROMPT_PREVIEW_LIMIT = 80;
 
 const gridEl = document.getElementById('grid');
 const statusEl = document.getElementById('status');
 const toastEl = document.getElementById('toast');
 let toastTimer = null;
 
-function truncatePrompt(content, limit = PROMPT_PREVIEW_LIMIT) {
+function normalizePromptPreview(content) {
   const text = typeof content === 'string' ? content : '';
+  return text
+    .replace(/\\r\\n|\\r|\\n/g, ' ')
+    .replace(/\r\n|\r|\n/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function truncatePrompt(content, limit = PROMPT_PREVIEW_LIMIT) {
+  const text = normalizePromptPreview(content);
   if (text.length <= limit) return text;
   return `${text.slice(0, limit).trimEnd()}...`;
 }
