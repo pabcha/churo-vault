@@ -74,8 +74,18 @@ function createCard(prompt) {
   title.textContent = prompt.name || 'Sin título';
 
   const text = document.createElement('p');
-  text.className = 'prompt';
+  text.className = 'prompt prompt-clickable';
   text.textContent = truncatePrompt(prompt.content);
+  text.setAttribute('role', 'button');
+  text.setAttribute('tabindex', '0');
+  text.setAttribute('aria-label', `Copiar prompt ${prompt.name || ''}`.trim());
+  text.addEventListener('click', () => copyToClipboard(prompt.content || '', button));
+  text.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      copyToClipboard(prompt.content || '', button);
+    }
+  });
 
   const actions = document.createElement('div');
   actions.className = 'actions';
